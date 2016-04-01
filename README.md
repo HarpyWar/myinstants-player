@@ -1,2 +1,6 @@
-# myinstants-api
-API for www.myinstants.com
+
+### API service
+http://api.cleanvoice.ru/myinstants/
+
+### Usage example
+http://harpywar.github.io/myinstants-api/
