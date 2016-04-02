@@ -14,11 +14,21 @@
 	<div class="search-container">
 		<input type="text" id="search-box" placeholder="Find in files >50000" autofocus /><button id="do-search">Search</button>
 	</div>
+	
+	<div class="tab-items">
+		<div class="tab-item active" id="tab-all">All sounds</div>
+		<div class="tab-item" id="tab-fav">Favourites</div>
+	</div>
+	<div class="clear"></div>
+
+
+	
 	<div id="items">...</div>
 	<div class="clear"></div>
 	<div class="pagelist"></div>
 	<div class="clear"></div>
 </div>
+
 
 <div id="login-screen">
 	<img src="https://forum.sinusbot.com/sinusbot-logo.png" />
@@ -84,10 +94,12 @@ var currentPage = 0; // current page offset
 var itemsOnPage = 180; // limit on page (const)
 var searchText = ""; // limit on page (const)
 var bot;
+var bookmarks;
 
 var itemTemplate,pageListTemplate; 
 $(document).ready(function(){
 
+	bookmarks = new Bookmarks();
 	tryLogin();
 
 	itemTemplate = Handlebars.compile( $('#item-template').html() );
@@ -118,19 +130,31 @@ $(document).ready(function(){
 	});
 	
 	loadItems();
+	
+	
+	$('#tab-all').click(function(){
+		currentPage = 0;
+		loadItems();
+	});
+	$('#tab-fav').click(function(){
+		currentPage = 0;
+		loadFavItems();
+	});
+
 });
 
 function tryLogin() {
 	$("#login-form").show();
 	$("#login-loading").hide();
 	
-	if ( localStorage.getItem("host") ) {	
-		$("#host").val( localStorage.getItem("host") );
-		$("#port").val( localStorage.getItem("port") );
-		$("#login").val( localStorage.getItem("login") );
-	}
-	if ( localStorage.getItem("token") ) {
-		tryGetInstances( $("#host").val(), $("#port").val(), localStorage.getItem("token"));
+	if ( localStorage["host"] ) {	
+		$("#host").val( localStorage["host"] );
+		$("#port").val( localStorage["port"] );
+		$("#login").val( localStorage["login"] );
+		
+		if ( localStorage["token"] ) {
+			tryGetInstances( localStorage["host"], localStorage["port"], localStorage["token"]);
+		}
 	}
 }
 
@@ -139,13 +163,13 @@ function login(host, port, login, password) {
 	$("#login-form").hide();
 	$("#login-loading").show();
 
-	localStorage.setItem("host", host);
-	localStorage.setItem("port", port);
-	localStorage.setItem("login", login);
+	localStorage["host"] = host;
+	localStorage["port"] = port;
+	localStorage["login"] = login;
 	
 	bot = new SinusBotAPI(host, port);
 	bot.auth( login, password, function(){
-		localStorage.setItem("token", bot.token);
+		localStorage["token"] = bot.token;
 
 		tryGetInstances(bot.host, bot.port, bot.token);
 	}, 
@@ -202,6 +226,9 @@ function loadItems()
 	$("#items").css("opacity", 0.4);
 	$("#do-search").attr('disabled', true);
 	
+	$('#tab-all').addClass('active');
+	$('#tab-fav').removeClass('active');
+	
 	$.get('http://api.cleanvoice.ru/myinstants/?type=many&search=' + encodeURIComponent(searchText) + '&offset=' + (currentPage*itemsOnPage) + '&limit=' + itemsOnPage, function(data){
 		var json = JSON.parse(data);
 		items = json.items;
@@ -216,6 +243,38 @@ function loadItems()
 		//$("#search-box").focus();
 	});
 }
+
+function loadFavItems()
+{
+	if ( bookmarks.isempty() ) {
+		return;
+	}
+	
+	$("#items").css("opacity", 0.4);
+	$("#do-search").attr('disabled', true);
+	
+	$('#tab-fav').addClass('active');
+	$('#tab-all').removeClass('active');
+	
+
+	$.post('http://api.cleanvoice.ru/myinstants/?type=many&offset=' + (currentPage*itemsOnPage) + '&limit=' + itemsOnPage, {
+		ids: bookmarks.toString()
+	}, function(data){
+		var json = JSON.parse(data);
+		items = json.items;
+		itemsCount = json.count;
+		$("#items").html( itemTemplate(json) );
+		
+		updatePageNavigator();
+		updateBinds();
+		
+		$("#items").css("opacity", 1.0);
+		$("#do-search").attr('disabled', false);
+		//$("#search-box").focus();
+	});
+}
+
+
 
 function updatePageNavigator()
 {
@@ -234,7 +293,12 @@ function updatePageNavigator()
 	
 		currentPage = $(this).text()-1;
 		$(this).addClass('loading');
-		loadItems();
+		
+		if ( $('#tab-all').hasClass('active') ) {
+			loadItems();
+		} else {
+			loadFavItems();
+		}
 		
 		return false;
 	});
@@ -249,6 +313,19 @@ function updateBinds()
 		
 		items[i].btnEl.bind('click', play);
 		i++;
+	});
+	
+	// fav buttons
+	$(".fav").click(function(){
+		var id = $(this).attr('data-id');
+		// bookmarked
+		if ( $(this).hasClass('active') ) {
+			bookmarks.remove(id);
+			$(this).removeClass('active');
+		} else {
+			bookmarks.add(id);
+			$(this).addClass('active');
+		}
 	});
 }
 var elapsedInterval;
@@ -365,11 +442,55 @@ Handlebars.registerHelper('highlight', function(inputText) {
 	return inputText;
 });
 
+Handlebars.registerHelper('is_bookmarked', function(id) {
+  return bookmarks.find(id) != -1 ? 'active' : '';
+});
 
 
 
 
 
+
+function Bookmarks() {
+	this.bookmarks = localStorage['bookmarks'] 
+		? JSON.parse(localStorage['bookmarks']) 
+		: [];
+
+	this.add = function(id) {
+		id = parseInt(id);
+		var i = this.find(id);
+		if (i == -1) {
+			this.bookmarks.push(id);
+			this._update();
+		}
+	};
+	
+	this.remove = function(id) {
+		id = parseInt(id);
+		var i = this.find(id);
+		if (i != -1) {
+			this.bookmarks.splice(i, 1);
+			this._update();
+		}
+	};
+	
+	this.find = function(id) {
+		id = parseInt(id);
+		return this.bookmarks.indexOf(id);
+	};
+
+	this.toString = function() {
+		return JSON.stringify(this.bookmarks);
+	};
+	
+	this.isempty = function() {
+		return this.bookmarks.length == 0;
+	};
+	
+	this._update = function() {
+		localStorage['bookmarks'] = this.toString();
+	}
+}
 
 
 function SinusBotAPI(host, port) {
@@ -474,6 +595,9 @@ function SinusBotAPI(host, port) {
 
 	<div class="row-container">
 		<table><tr>
+		<td style="width: 18px; padding: 0">
+			<div class="fav {{is_bookmarked this.id}}" data-id="{{this.id}}"></div> 
+		</td>
 		<td>
 			<div class="switch">
 				<input type="checkbox" data-idx="{{@index}}">
@@ -760,6 +884,58 @@ div.row-container table td {
 #login-loading {
 	margin-top: 110px;
 }
+
+
+
+/* tabs */
+
+.tab-items {
+	margin-left: 25px;
+	height: 50px;
+}
+.tab-item {
+	float: left;
+	width: 150px;
+	padding: 10px;
+	border-bottom: 1px solid silver;
+	text-align: center;
+	cursor: pointer;
+	font-weight: bold;
+	color: silver;
+}
+.tab-item:hover {
+	background: #eee;
+	color: #333;
+}
+.tab-item.active {
+	border: 1px solid silver;
+	border-bottom: 1px solid white;
+	color: #333;
+}
+.tab-item.active:hover {
+	background: white;
+}
+
+
+
+
+/* favourite button */
+
+.fav {
+	background: url('data:image/png;base64,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');
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+}
+.fav:hover {
+	background-position: center top;
+}
+.fav.active {
+	background-position: center bottom;
+}
+
+
 
 
 /* ajax loader */
