@@ -6,5 +6,5 @@ http://harpywar.github.io/myinstants-player/
 http://harpywar.github.io/myinstants-player/sinusbot.html
 
 ---
-#### API service
+#### MyInstants API
 http://api.cleanvoice.ru/myinstants/

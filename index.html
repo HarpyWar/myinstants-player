@@ -1,5 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
 <title>MyInstants Player</title>
-<h1>MyInstants Player <sup><small><small><a href="https://github.com/HarpyWar/myinstants-player">GitHub</a></small></small></sup></h1>
+
+<link rel="stylesheet" type="text/css" href="app.css">
+
+<script src="https://code.jquery.com/jquery-1.4.2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<h1>MyInstants Player <sup><span style="font-size: 12px"><a href="https://github.com/HarpyWar/myinstants-player">GitHub</a></span></sup></h1>
 
 
 
@@ -8,6 +20,13 @@
 	<div class="search-container">
 		<input type="text" id="search-box" placeholder="Find in files >50000" autofocus /><button id="do-search">Search</button>
 	</div>
+	
+	<div class="tab-items">
+		<div class="tab-item active" id="tab-all">All sounds</div>
+		<div class="tab-item" id="tab-fav">Favourites</div>
+	</div>
+	<div class="clear"></div>
+	
 	<div id="items">...</div>
 	<div class="clear"></div>
 	<div class="pagelist"></div>
@@ -29,418 +48,25 @@
 
 
 
-<style>
-body {
-	font-family: 'Lucida Grande', 'Helvetica Neue', sans-serif;
-	font-size: 13px;
-}
-
-.page-container {
-	 width: 700px
-	 background: white;
-}
-
-div.row-container {
-	float: left;
-	margin-left: 20px;
-}
-div.row-title {
-	position: relative;
-	overflow: hidden;
-	white-space: nowrap;
-	background-color: #fff;
-}
-div.row-title:after {
-	content: "";
-	pointer-events: none;
-	position: absolute;
-	width: 20px;
-	height: 100%;
-	top: 0; right: 0;
-	
-	background-image: -webkit-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-	background-image: -moz-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-	background-image: -ms-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-	background-image: -o-linear-gradient(right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-	background-image: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-}
-div.row-container table td {
-	font-size: 14px;
-	padding: 3px;
-}
-
-
-.row-title-container {
-	width: 150px;
-}
-
-.row-duration {
-	width: 20px;
-}
-.row-duration span {
-	font-size: 12px;
-}
-
-/* switch button */
- *,
-    *:after,
-    *:before {
-        box-sizing: border-box;
-    }
-	
-.switch {
-    width: 18px;
-    height: 18px;
-    position: relative;
-}
-.switch label {
-    display: block;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    border-radius: 50%;
-    background: #eaeaea;
-    box-shadow: 
-        0 3px 5px rgba(0,0,0,0.25),
-        inset 0 1px 0 rgba(255,255,255,0.3),
-        inset 0 -5px 5px rgba(100,100,100,0.1),
-        inset 0 5px 5px rgba(255,255,255,0.3);
-}
-.switch label:after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: -8%; 
-    right: -8%; 
-    bottom: -8%; 
-    left: -8%;
-    border-radius: inherit;
-    background: #ddd; /* Fallback */
-    background: linear-gradient(#ccc, #fff);
-    box-shadow: 
-        inset 0 2px 1px rgba(0,0,0,0.15),
-        0 2px 5px rgba(200,200,200,0.1);
-}
-.switch label:before {
-    content: "";
-    position: absolute;
-    width: 20%;
-    height: 20%; 
-    left: 40%;
-    top: 40%;
-    border-radius: inherit;
-    background: #969696; /* Fallback */
-    background: radial-gradient(40% 35%, #ccc, #969696 60%);
-    box-shadow:
-        inset 0 2px 4px 1px rgba(0,0,0,0.3),
-        0 1px 0 rgba(255,255,255,1),
-        inset 0 1px 0 white;
-}
-.switch input {
-    /* First, we make it as wide as the container */
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    /* Then, we put it on top of everything else */
-    z-index: 100;
-    /* Last, we make it invisible */
-    opacity: 0;
-    /* This one is just for ergonomy */
-    cursor: pointer;
-	margin: 0;
-}
-.switch input:checked ~ label { /* Button */
-	background: #e5e5e5; /* Fallback */
-    background: linear-gradient(#dedede, #fdfdfd);
-}
-
-.switch input:checked ~ label:before { /* LED */
-    background: #25d025; /* Fallback */
-    background: radial-gradient(40% 35%, #5aef5a, #25d025 60%);
-    box-shadow:
-        inset 0 3px 5px 1px rgba(0,0,0,0.1),
-        0 1px 0 rgba(255,255,255,0.4),
-        0 0 10px 2px rgba(0, 210, 0, 0.5);
-}
-
-.clear {
-	clear: both;
-}
-
-/* page navigator */
-.pagelist {
-	margin-top: 24px;
-	width: 100%;
-	padding-bottom: -24px;
-}
 
 
 
-.btn-small {
-  background: #3498db;
-  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
-  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
-  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
-  background-image: -o-linear-gradient(top, #3498db, #2980b9);
-  background-image: linear-gradient(to bottom, #3498db, #2980b9);
-  font-family: Arial;
-  color: #ffffff;
-  font-size: 13px;
-  padding: 5px 10px 5px 10px;
-  text-decoration: none;
-}
-
-.btn-small:hover {
-  background: #3cb0fd;
-  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
-  text-decoration: none;
-}
-
-.btn-small.disabled {
-  background: silver;.
-}
-.btn-small.loading {
-  background: crimson;.
-}
-
-.search-container {
-	margin: 25px;
-	margin-bottom: 10px;
-}
-#search-box, #do-search {
-	padding: 5px 3px;display:table-cell;
-}
-#search-box {
-	width: 90%;
-}
-#do-search {
-	width: 10%;
-}
-
-.highlight
-{
-	background-color: #F9F0B5;
-}
-</style>
-
-<script src="https://code.jquery.com/jquery-1.4.2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
-<script>
-/*
- * (c) 2016 HarpyWar <harpywar@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-var itemsCount = 0; // overall items count
-var currentPage = 0; // current page offset
-var itemsOnPage = 180; // limit on page (const)
-var searchText = ""; // limit on page (const)
-
-var itemTemplate,pageListTemplate; 
-$(document).ready(function(){
-	
-	itemTemplate = Handlebars.compile( $('#item-template').html() );
-	pageListTemplate = Handlebars.compile( $('#pagelist-template').html() );
-
-	// event on enter 
-	$('#search-box').keypress(function (event) {
-		if(event.which === 13){
-			// only if button is enabled
-			if ( $("#do-search").attr('disabled') == false )
-			{
-				$("#do-search").click();
-			}
-		}
-	});
-	$("#do-search").click(function() {
-		searchText = $("#search-box").val().trim();
-		currentPage = 0;
-		loadItems();
-	});
-	
-	loadItems();
-});
-
-function loadItems()
-{
-	$("#items").css("opacity", 0.4);
-	$("#do-search").attr('disabled', true);
-	
-	$.get('http://api.cleanvoice.ru/myinstants/?type=many&search=' + encodeURIComponent(searchText) + '&offset=' + (currentPage*itemsOnPage) + '&limit=' + itemsOnPage, function(data){
-		var json = JSON.parse(data);
-		items = json.items;
-		itemsCount = json.count;
-		$("#items").html( itemTemplate(json) );
-		
-		updatePageNavigator();
-		updateBinds();
-		
-		$("#items").css("opacity", 1.0);
-		$("#do-search").attr('disabled', false);
-		//$("#search-box").focus();
-	});
-}
-
-function updatePageNavigator()
-{
-	// page navigator
-	var pages = [];
-	for (var i = 0; i < Math.ceil(itemsCount / itemsOnPage); i++)
-	{
-		var selected = (i == currentPage) ? true : false;
-		pages.push({ number: i+1, selected: selected });
-	}
-	$(".pagelist").html(pageListTemplate(pages));
-	
-	$(".select-page").click(function(){
-		if (currentPage-1 == $(this).text())
-			return false;
-	
-		currentPage = $(this).text()-1;
-		$(this).addClass('loading');
-		loadItems();
-		
-		return false;
-	});
-}
-
-function updateBinds()
-{
-	var i = 0;
-	$("#items .row-container").each(function(){
-		items[i].btnEl = $(this).find(".switch input:checkbox");
-		items[i].durationEl = $(this).find(".row-duration span");
-		
-		items[i].btnEl.bind('click', play);
-		i++;
-	});
-}
-var elapsedInterval;
-var items;
-var currentIdx; // current or last played index
-
-// to modify item
-function getItemIndexById(id)
-{
-	for (var i = 0; i < items.length; i++)
-	{
-		if ( items[i].id == id )
-		{
-			return i;
-		}
-	}
-	return false;
-}
-
-function play()
-{
-	var $btn = $(this); // el
-	currentIdx = $btn.attr('data-idx');
-
-	var playUrl = 'http://api.cleanvoice.ru/myinstants/?type=file&id=' + items[currentIdx].id;
-	
-	$("#audio-container").html('<audio autoplay><source src="' + playUrl + '" type="audio/mpeg"></audio>');
-	
-	playAllowed($btn);
-
-	//
-	// HINT: here may be your implementation to send audio url 
-	//       to another service like SinusBot API
-	//       something like the following code:
-	/*
-	$.post('yourapiurl', {
-		'url': encodeURIComponent(playUrl)
-	}, function(){
-		playAllowed($btn);
-	});
-	*/
-}
-
-// activate button
-function playAllowed($btn)
-{
-	currentIdx = $btn.attr('data-idx');
-	
-	var duration = Math.ceil(items[currentIdx].duration);
-	var $duration = items[currentIdx].durationEl; // el
-	if ($duration.text() != duration)
-	$duration.text(duration); // reset duration
-
-	//console.log(duration);
-	
-	// and clear old interval (may be from another checkbox)
-	clearInterval(elapsedInterval);
-
-	// update current status
-	items[currentIdx].play = true;
-	// check button always on click
-	//$btn.attr('checked', true);
-	
-	
-	setTimeout(function(){
-		// reset all status
-		for (var i = 0; i < items.length; i++)
-		{
-			// ignore current clicked
-			if (i == currentIdx)
-			{
-				continue;
-			}
-			// if playing
-			if (items[i].play == true)
-			{
-				console.log(i);
-				items[i].play = false;
-				// uncheck button
-				items[i].btnEl.attr('checked', false);
-				// reset duration
-				items[i].durationEl.text( Math.ceil(items[i].duration) );
-			}
-		};
-	}, 1000);
-
-	// decrease immediately by 1 second
-	$duration.text( $duration.text() - 1 );
-	
-	// update elapsed time of track playing
-	elapsedInterval = setInterval(function(){
-		var currentDuration = parseInt( $duration.text() );
-		$duration.text( --currentDuration );
-		if (currentDuration < 0)
-		{
-			clearInterval(elapsedInterval);
-			$duration.text( $duration.attr('data-init') );
-			
-			$btn.attr('checked', false);
-		}
-	}, 1000);
-}
 
 
-Handlebars.registerHelper('ceil', function(value) {
-  return Math.ceil(value);
-});
 
-Handlebars.registerHelper('highlight', function(inputText) {
-	if (searchText.length == 0)
-	{
-		return inputText;
-	}
-    var index = inputText.toLowerCase().indexOf(searchText.toLowerCase());
-    if ( index >= 0 )
-    { 
-        inputText = inputText.substring(0,index) + "<span class='highlight'>" + inputText.substring(index,index+searchText.length) + "</span>" + inputText.substring(index + searchText.length);
-    }
-	return inputText;
-});
 
-</script>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -449,8 +75,11 @@ Handlebars.registerHelper('highlight', function(inputText) {
 
 	<div class="row-container">
 		<table><tr>
+		<td style="width: 18px; padding: 0">
+			<div class="fav {{is_bookmarked this.id}}" data-id="{{this.id}}" title="Add to favourites"></div> 
+		</td>
 		<td>
-			<div class="switch">
+			<div class="switch" title="Play sound">
 				<input type="checkbox" data-idx="{{@index}}">
 				<label></label>
 			</div> 
@@ -479,5 +108,8 @@ Handlebars.registerHelper('highlight', function(inputText) {
 </script>
 
 
-<br>
-<div style="width: 100%; text-align: right;">(c) 2016, <a rel="license" href="http://harpywar.com">HarpyWar</a>.</div>
+<div class="copyrights">(c) 2016, <a rel="license" href="http://harpywar.com">HarpyWar</a>.</div>
+
+
+</body>
+</html>
