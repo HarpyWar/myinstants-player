@@ -85,6 +85,7 @@ function loadItems(fav)
 	var payload = {};
 	if (fav) {
 		if ( bookmarks.isempty() ) {
+			alert('You have no favourite sounds yet');
 			return;
 		}
 		payload.ids = bookmarks.toString();
@@ -100,7 +101,7 @@ function loadItems(fav)
 		$('#tab-fav').removeClass('active');
 	}
 	
-	$.post('http://api.cleanvoice.ru/myinstants/?type=many&search=' + encodeURIComponent(searchText) + '&offset=' + (currentPage*itemsOnPage) + '&limit=' + itemsOnPage, payload, function(data){
+	$.post('https://api.cleanvoice.ru/myinstants/?type=many&search=' + encodeURIComponent(searchText) + '&offset=' + (currentPage*itemsOnPage) + '&limit=' + itemsOnPage, payload, function(data){
 		var json = JSON.parse(data);
 		items = json.items;
 		itemsCount = json.count;
@@ -168,7 +169,7 @@ function play()
 	var $btn = $(this); // el
 	currentIdx = $btn.attr('data-idx');
 
-	var playUrl = 'http://api.cleanvoice.ru/myinstants/?type=file&id=' + items[currentIdx].id;
+	var playUrl = 'https://api.cleanvoice.ru/myinstants/?type=file&id=' + items[currentIdx].id;
 	
 	$("#audio-container").html('<audio autoplay><source src="' + playUrl + '" type="audio/mpeg"></audio>');
 	

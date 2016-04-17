@@ -1,10 +1,10 @@
 
 ### Web Player
-http://harpywar.github.io/myinstants-player/
+https://harpywar.github.io/myinstants-player/
 
 ### SinusBot Player
-http://harpywar.github.io/myinstants-player/sinusbot.html
+https://harpywar.github.io/myinstants-player/sinusbot.html
 
 ---
 #### MyInstants API
-http://api.cleanvoice.ru/myinstants/
+https://api.cleanvoice.ru/myinstants/

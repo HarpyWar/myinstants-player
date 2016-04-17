@@ -26,7 +26,7 @@ function play()
 {
 	var $btn = $(this); // el
 	currentIdx = $btn.attr('data-idx');
-	var playUrl = 'http://api.cleanvoice.ru/myinstants/?type=file&id=' + items[currentIdx].id;
+	var playUrl = 'https://api.cleanvoice.ru/myinstants/?type=file&id=' + items[currentIdx].id;
 	//$("#audio-container").html('<audio autoplay><source src="' + playUrl + '" type="audio/mpeg"></audio>');
 	
 	//
@@ -180,7 +180,7 @@ function SinusBotAPI(host, port) {
 	};
 	
 	this.url = function() {
-		return 'http://api.cleanvoice.ru/cors/';
+		return 'https://api.cleanvoice.ru/cors/';
 	};
 	
 	this.send = function(type, url, data, success, error) {
