@@ -26,7 +26,7 @@ function play()
 {
 	var $btn = $(this); // el
 	currentIdx = $btn.attr('data-idx');
-	var playUrl = 'https://api.cleanvoice.ru/myinstants/?type=file&id=' + items[currentIdx].id;
+	var playUrl = 'http://api.cleanvoice.ru/myinstants/?type=file&id=' + items[currentIdx].id;
 	//$("#audio-container").html('<audio autoplay><source src="' + playUrl + '" type="audio/mpeg"></audio>');
 	
 	//
