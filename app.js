@@ -21,7 +21,7 @@ $(document).ready(function(){
 	itemTemplate = Handlebars.compile( $('#item-template').html() );
 	pageListTemplate = Handlebars.compile( $('#pagelist-template').html() );
 
-	
+	init();
 	loadItems();
 	
 	// event on enter 
@@ -77,6 +77,15 @@ function updateBinds()
 			bookmarks.add(id);
 			$(this).addClass('active');
 		}
+	});
+}
+
+function init()
+{
+	$.get('https://api.cleanvoice.ru/myinstants/?type=status', function(data){
+		var json = JSON.parse(data);
+		var count = json.count;
+		$("#search-box").attr('placeholder', $("#search-box").attr('placeholder') + count + ' media files');
 	});
 }
 
